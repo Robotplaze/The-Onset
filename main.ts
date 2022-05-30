@@ -2,18 +2,8 @@ namespace SpriteKind {
     export const asteroid = SpriteKind.create()
     export const enemyprojectile = SpriteKind.create()
     export const Boss = SpriteKind.create()
+    export const Powerup1 = SpriteKind.create()
 }
-controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    for (let index = 0; index < 30; index++) {
-        projectile = sprites.createProjectileFromSprite(img`
-            5 5 
-            5 5 
-            5 5 
-            5 5 
-            `, mySprite, 0, -100)
-        pause(10)
-    }
-})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.asteroid, function (sprite, otherSprite) {
     otherSprite.destroy()
     statusbar.value += -1
@@ -23,15 +13,23 @@ statusbars.onZero(StatusBarKind.Health, function (status) {
     mySprite.destroy()
     game.over(false, effects.bubbles)
 })
-sprites.onOverlap(SpriteKind.Projectile, SpriteKind.asteroid, function (sprite, otherSprite) {
-    otherSprite.destroy(effects.coolRadial, 500)
+sprites.onOverlap(SpriteKind.Projectile, SpriteKind.asteroid, function (sprite2, otherSprite2) {
+    otherSprite2.destroy(effects.coolRadial, 500)
     info.changeScoreBy(1)
 })
-let missile: Sprite = null
+sprites.onOverlap(SpriteKind.Player, SpriteKind.Powerup1, function (sprite, otherSprite) {
+    otherSprite.destroy(effects.smiles, 500)
+})
+sprites.onOverlap(SpriteKind.Boss, SpriteKind.Projectile, function (sprite, otherSprite) {
+    otherSprite.destroy()
+    statusbar.value += -2
+})
+let projectile: Sprite = null
 let boss_health_bar: StatusBarSprite = null
 let boss1: Sprite = null
+let Machine_gun_powerup: Sprite = null
+let counter = 0
 let asteroid_sprite: Sprite = null
-let projectile: Sprite = null
 let statusbar: StatusBarSprite = null
 let mySprite: Sprite = null
 effects.starField.startScreenEffect()
@@ -59,7 +57,6 @@ mySprite.setStayInScreen(true)
 statusbar = statusbars.create(20, 4, StatusBarKind.Health)
 statusbar.max = 10
 statusbar.attachToSprite(mySprite)
-let counter = 0
 info.setScore(0)
 game.onUpdateInterval(5000, function () {
     for (let index = 0; index < 5; index++) {
@@ -86,6 +83,53 @@ game.onUpdateInterval(5000, function () {
         counter += 1
     }
 })
+game.onUpdateInterval(5000, function () {
+    for (let index = 0; index < 2; index++) {
+        Machine_gun_powerup = sprites.create(img`
+            . . 9 9 9 9 . . 
+            . 9 9 9 9 9 9 . 
+            9 f 9 9 f f f 9 
+            f f f 9 f 9 f 9 
+            9 f 9 9 f f f 9 
+            9 9 9 9 f 9 9 9 
+            . 9 9 9 f 9 9 . 
+            . . 9 9 9 9 . . 
+            `, SpriteKind.Powerup1)
+        Machine_gun_powerup.setPosition(randint(0, 140), 0)
+        Machine_gun_powerup.setVelocity(0, 50)
+    }
+})
+game.onUpdateInterval(5000, function () {
+    for (let index = 0; index < 3; index++) {
+        let missile: Sprite = null
+        missile.setPosition(randint(0, 160), 0)
+        missile.setVelocity(0, 50)
+        animation.runImageAnimation(
+        missile,
+        [img`
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 2 2 2 2 c c 
+            c c 2 2 2 2 c c 
+            c c c c c c c c 
+            c c c c c c c c 
+            `,img`
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 2 2 2 2 b b 
+            b b 2 2 2 2 b b 
+            b b b b b b b b 
+            b b b b b b b b 
+            `],
+        100,
+        true
+        )
+    }
+})
 game.onUpdateInterval(500, function () {
     if (counter >= 10) {
         counter = 0
@@ -107,46 +151,12 @@ game.onUpdateInterval(500, function () {
             . c c c c c c c c c c c c c c . 
             . . . . . . . . . . . . . . . . 
             `, SpriteKind.Boss)
-        boss_health_bar = statusbars.create(20, 4, StatusBarKind.EnemyHealth)
+        boss_health_bar = statusbars.create(40, 4, StatusBarKind.EnemyHealth)
         boss_health_bar.max = 100
         boss_health_bar.value = 100
         boss_health_bar.setLabel("BOSS:", 2)
-        mySprite.setPosition(75, 5)
-        for (let index = 0; index < 15; index++) {
-            boss1.setPosition(randint(0, 160), 15)
-            missile = sprites.create(img`
-                b 5 5 b 
-                b 5 5 b 
-                b 2 2 b 
-                b b b b 
-                `, SpriteKind.asteroid)
-            boss1.setPosition(randint(0, 160), 0)
-            missile.setVelocity(0, 50)
-            animation.runImageAnimation(
-            missile,
-            [img`
-                c c 4 4 4 4 c c 
-                c c 4 4 4 4 c c 
-                c c 4 4 4 4 c c 
-                c c 4 4 4 4 c c 
-                c c 2 2 2 2 c c 
-                c c 2 2 2 2 c c 
-                c c c c c c c c 
-                c c c c c c c c 
-                `,img`
-                b b 5 5 5 5 b b 
-                b b 5 5 5 5 b b 
-                b b 5 5 5 5 b b 
-                b b 5 5 5 5 b b 
-                b b 2 2 2 2 b b 
-                b b 2 2 2 2 b b 
-                b b b b b b b b 
-                b b b b b b b b 
-                `],
-            100,
-            true
-            )
-        }
+        boss_health_bar.setPosition(75, 5)
+        boss1.setPosition(randint(0, 160), 15)
     }
 })
 game.onUpdateInterval(100, function () {
