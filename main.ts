@@ -4,14 +4,58 @@ namespace SpriteKind {
     export const Boss = SpriteKind.create()
     export const Powerup1 = SpriteKind.create()
 }
+statusbars.onDisplayUpdated(StatusBarKind.EnemyHealth, function (status, image2) {
+    for (let index = 0; index < 3; index++) {
+        missile = sprites.create(img`
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 2 2 2 2 c c 
+            c c 2 2 2 2 c c 
+            c c c c c c c c 
+            c c c c c c c c 
+            `, SpriteKind.Player)
+        animation.runImageAnimation(
+        missile,
+        [img`
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 2 2 2 2 c c 
+            c c 2 2 2 2 c c 
+            c c c c c c c c 
+            c c c c c c c c 
+            `,img`
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 5 5 5 5 b b 
+            b b 2 2 2 2 b b 
+            b b 2 2 2 2 b b 
+            b b b b b b b b 
+            b b b b b b b b 
+            `],
+        100,
+        true
+        )
+        missile.setPosition(randint(0, 160), 0)
+        missile.setVelocity(0, 50)
+    }
+})
 sprites.onOverlap(SpriteKind.Player, SpriteKind.asteroid, function (sprite, otherSprite) {
     otherSprite.destroy()
     statusbar.value += -1
     info.changeScoreBy(-1)
 })
+statusbars.onZero(StatusBarKind.EnemyHealth, function (status) {
+    boss1.destroy()
+    countdown += 1
+})
 statusbars.onZero(StatusBarKind.Health, function (status) {
     mySprite.destroy()
-    game.over(false, effects.bubbles)
+    game.over(false)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.asteroid, function (sprite2, otherSprite2) {
     otherSprite2.destroy(effects.coolRadial, 500)
@@ -22,14 +66,16 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Powerup1, function (sprite, othe
 })
 sprites.onOverlap(SpriteKind.Boss, SpriteKind.Projectile, function (sprite, otherSprite) {
     otherSprite.destroy()
-    statusbar.value += -2
+    boss_health_bar.value += -2
 })
 let projectile: Sprite = null
-let boss_health_bar: StatusBarSprite = null
-let boss1: Sprite = null
 let Machine_gun_powerup: Sprite = null
 let counter = 0
 let asteroid_sprite: Sprite = null
+let boss_health_bar: StatusBarSprite = null
+let countdown = 0
+let boss1: Sprite = null
+let missile: Sprite = null
 let statusbar: StatusBarSprite = null
 let mySprite: Sprite = null
 effects.starField.startScreenEffect()
@@ -101,9 +147,16 @@ game.onUpdateInterval(5000, function () {
 })
 game.onUpdateInterval(5000, function () {
     for (let index = 0; index < 3; index++) {
-        let missile: Sprite = null
-        missile.setPosition(randint(0, 160), 0)
-        missile.setVelocity(0, 50)
+        missile = sprites.create(img`
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 4 4 4 4 c c 
+            c c 2 2 2 2 c c 
+            c c 2 2 2 2 c c 
+            c c c c c c c c 
+            c c c c c c c c 
+            `, SpriteKind.Player)
         animation.runImageAnimation(
         missile,
         [img`
@@ -128,6 +181,8 @@ game.onUpdateInterval(5000, function () {
         100,
         true
         )
+        missile.setPosition(randint(0, 160), 0)
+        missile.setVelocity(0, 50)
     }
 })
 game.onUpdateInterval(500, function () {
